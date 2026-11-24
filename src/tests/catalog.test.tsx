@@ -90,4 +90,15 @@ describe('Catalog and CartBadge (RF-01, RF-02, RF-03, RF-04)', () => {
     expect(quantityInput).toHaveValue('99')
     expect(increase).toBeDisabled()
   })
+
+  it('renders all catalog items with name, description, price, tags and image (RF-01)', () => {
+    renderApp('/')
+
+    expect(screen.getByRole('heading', { name: /nossos cafés/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /expresso tradicional/i })).toBeInTheDocument()
+    expect(screen.getByText(/o tradicional café feito com água quente e grãos moídos/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/9,90/).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('img').length).toBeGreaterThanOrEqual(14)
+    expect(screen.getAllByRole('button', { name: /adicionar .* ao carrinho/i })).toHaveLength(14)
+  })
 })
