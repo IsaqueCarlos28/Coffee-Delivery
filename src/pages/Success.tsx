@@ -23,7 +23,11 @@ const EmptyDescription = styled.p`
 `
 
 const HomeLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
   border-radius: 6px;
   background: ${({ theme }) => theme.colors.primary};

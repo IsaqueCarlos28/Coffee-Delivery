@@ -44,18 +44,32 @@ const LogoImage = styled.img`
 const Actions = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+
+  @media (min-width: 480px) {
+    gap: 0.75rem;
+  }
 `
 
 const LocationBadge = styled.span`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
+  min-height: 2.75rem;
   padding: 0.5rem;
   border-radius: 6px;
   background: ${({ theme }) => theme.colors.surfaceAlt};
-  color: ${({ theme }) => theme.colors.accent};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.875rem;
+`
+
+const CompactText = styled.span`
+  display: none;
+
+  @media (min-width: 480px) {
+    display: inline;
+  }
 `
 
 const CartLink = styled(Link)`
@@ -91,11 +105,12 @@ export function Header() {
         <Actions>
           <LocationBadge aria-label={`Localização: ${HEADER_LOCATION}`}>
             <span aria-hidden="true">📍</span>
-            {HEADER_LOCATION}
+            <CompactText>{HEADER_LOCATION}</CompactText>
           </LocationBadge>
           <ThemeToggle />
           <CartLink to="/checkout" aria-label={cartLabel}>
-            Carrinho
+            <span aria-hidden="true">🛒</span>
+            <CompactText>Carrinho</CompactText>
             <CartBadge />
           </CartLink>
         </Actions>

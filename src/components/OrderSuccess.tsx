@@ -31,13 +31,17 @@ const Subtitle = styled.p`
 
 const OrderInfoCard = styled.div`
   margin-top: 2.5rem;
-  padding: 2.5rem;
+  padding: 1.5rem;
   border-radius: 6px 36px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: ${({ theme }) => theme.colors.surface};
   display: flex;
   flex-direction: column;
   gap: 2rem;
+
+  ${media.tablet} {
+    padding: 2.5rem;
+  }
 `
 
 const InfoRow = styled.div`

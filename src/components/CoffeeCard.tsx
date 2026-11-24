@@ -40,7 +40,7 @@ const Tag = styled.span`
   padding: 0.25rem 0.5rem;
   border-radius: 100px;
   background: ${({ theme }) => theme.colors.surfaceAlt};
-  color: ${({ theme }) => theme.colors.accent};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -64,7 +64,8 @@ const Footer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 `
 
 const Price = styled.p`
@@ -83,6 +84,7 @@ const Actions = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 `
 
 const AddToCartButton = styled.button`

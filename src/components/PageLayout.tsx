@@ -9,7 +9,7 @@ const MainContent = styled.main`
   padding: 2rem 1.5rem;
 
   ${media.desktop} {
-    padding: 2.5rem 0;
+    padding: 2.5rem 1.5rem;
   }
 `
 

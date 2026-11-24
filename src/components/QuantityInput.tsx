@@ -23,13 +23,13 @@ const ControlButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: ${({ theme }) => theme.colors.accent};
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
 
   &:disabled {

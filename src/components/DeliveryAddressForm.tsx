@@ -73,6 +73,7 @@ const Label = styled.label`
 
 const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
+  min-height: 2.75rem;
   padding: 0.75rem;
   border-radius: 4px;
   border: 1px solid

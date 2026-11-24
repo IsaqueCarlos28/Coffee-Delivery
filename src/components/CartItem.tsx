@@ -24,8 +24,14 @@ const ItemImage = styled.img`
 const ItemContent = styled.div`
   flex: 1;
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+  }
 `
 
 const ItemInfo = styled.div`
