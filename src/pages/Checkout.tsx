@@ -57,6 +57,9 @@ export function Checkout() {
   const { detailedItems, subtotalInCents } = useCart()
   const {
     register,
+    watch,
+    setValue,
+    setFocus,
     formState: { errors },
   } = useForm<CheckoutFormInput>({
     resolver: zodResolver(checkoutSchema),
@@ -71,6 +74,7 @@ export function Checkout() {
       uf: '',
     },
   })
+  const cep = watch('cep')
   const isCartEmpty = detailedItems.length === 0
   const deliveryFeeInCents = isCartEmpty ? 0 : DELIVERY_FEE_IN_CENTS
   const totalInCents = calculateTotal(subtotalInCents, DELIVERY_FEE_IN_CENTS)
@@ -88,7 +92,13 @@ export function Checkout() {
           <div>
             <SectionTitle>Complete seu pedido</SectionTitle>
             <Card>
-              <DeliveryAddressForm register={register} errors={errors} />
+              <DeliveryAddressForm
+                register={register}
+                errors={errors}
+                cep={cep}
+                setValue={setValue}
+                setFocus={setFocus}
+              />
             </Card>
           </div>
         </LeftColumn>

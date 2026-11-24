@@ -1,10 +1,19 @@
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetFocus,
+  UseFormSetValue,
+} from 'react-hook-form'
 import styled from 'styled-components'
+import { useCep } from '../hooks/useCep'
 import type { CheckoutFormInput } from '../schemas/checkoutSchema'
 
 interface DeliveryAddressFormProps {
   register: UseFormRegister<CheckoutFormInput>
   errors: FieldErrors<CheckoutFormInput>
+  cep: string
+  setValue: UseFormSetValue<CheckoutFormInput>
+  setFocus: UseFormSetFocus<CheckoutFormInput>
 }
 
 const FormContainer = styled.div`
@@ -87,6 +96,12 @@ const ErrorMessage = styled.p`
   color: ${({ theme }) => theme.colors.danger};
 `
 
+const CepStatusMessage = styled.p<{ $status: 'loading' | 'notFound' | 'error' | 'success' }>`
+  font-size: 0.75rem;
+  color: ${({ theme, $status }) =>
+    $status === 'loading' ? theme.colors.textMuted : theme.colors.danger};
+`
+
 function formatCep(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 8)
 
@@ -119,7 +134,14 @@ function AddressField({ id, label, error, span, children }: AddressFieldProps) {
   )
 }
 
-export function DeliveryAddressForm({ register, errors }: DeliveryAddressFormProps) {
+export function DeliveryAddressForm({
+  register,
+  errors,
+  cep,
+  setValue,
+  setFocus,
+}: DeliveryAddressFormProps) {
+  const { status: cepStatus, message: cepMessage } = useCep({ cep, setValue, setFocus })
   const cepRegistration = register('cep')
 
   return (
@@ -141,7 +163,11 @@ export function DeliveryAddressForm({ register, errors }: DeliveryAddressFormPro
             autoComplete="postal-code"
             placeholder="CEP"
             aria-invalid={errors.cep ? 'true' : 'false'}
-            aria-describedby={errors.cep ? 'cep-error' : undefined}
+            aria-describedby={
+              [errors.cep ? 'cep-error' : null, cepMessage ? 'cep-status' : null]
+                .filter(Boolean)
+                .join(' ') || undefined
+            }
             $hasError={!!errors.cep}
             {...cepRegistration}
             onChange={(event) => {
@@ -149,6 +175,16 @@ export function DeliveryAddressForm({ register, errors }: DeliveryAddressFormPro
               cepRegistration.onChange(event)
             }}
           />
+          {cepMessage ? (
+            <CepStatusMessage
+              id="cep-status"
+              role={cepStatus === 'notFound' || cepStatus === 'error' ? 'alert' : undefined}
+              aria-live="polite"
+              $status={cepStatus as 'loading' | 'notFound' | 'error' | 'success'}
+            >
+              {cepMessage}
+            </CepStatusMessage>
+          ) : null}
         </AddressField>
 
         <AddressField id="street" label="Rua" error={errors.street?.message} span="1 / 4">
