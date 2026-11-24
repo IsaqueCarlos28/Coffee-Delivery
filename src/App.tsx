@@ -1,13 +1,16 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AppRoutes } from './AppRoutes'
+import { CartProvider } from './contexts/CartContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 
 export function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </CartProvider>
     </ThemeProvider>
   )
 }
