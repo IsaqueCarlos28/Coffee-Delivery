@@ -5,6 +5,7 @@ import { CartItem } from '../components/CartItem'
 import { CartSummary } from '../components/CartSummary'
 import { DeliveryAddressForm } from '../components/DeliveryAddressForm'
 import { EmptyCart } from '../components/EmptyCart'
+import { PaymentMethodSelector } from '../components/PaymentMethodSelector'
 import { DELIVERY_FEE_IN_CENTS } from '../constants'
 import { useCart } from '../hooks/useCart'
 import { checkoutSchema, type CheckoutFormInput } from '../schemas/checkoutSchema'
@@ -101,6 +102,9 @@ export function Checkout() {
               />
             </Card>
           </div>
+          <Card>
+            <PaymentMethodSelector register={register} errors={errors} />
+          </Card>
         </LeftColumn>
 
         <RightColumn>

@@ -95,4 +95,21 @@ describe('Checkout (RF-05, RF-10, RN-09)', () => {
     expect(cepInput).toHaveAttribute('aria-describedby', 'cep-error')
     expect(screen.getByLabelText(/complemento \(opcional\)/i)).toBeInTheDocument()
   })
+
+  it('renders payment methods with no pre-selection (RF-09, RN-05)', () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.cart,
+      JSON.stringify([{ coffeeId: 'expresso-tradicional', quantity: 1 }]),
+    )
+
+    renderCheckout()
+
+    const credit = screen.getByLabelText(/cartão de crédito/i)
+    const debit = screen.getByLabelText(/cartão de débito/i)
+    const cash = screen.getByLabelText(/dinheiro/i)
+
+    expect(credit).not.toBeChecked()
+    expect(debit).not.toBeChecked()
+    expect(cash).not.toBeChecked()
+  })
 })
