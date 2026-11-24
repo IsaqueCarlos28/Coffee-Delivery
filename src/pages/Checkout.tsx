@@ -1,9 +1,13 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import { CartItem } from '../components/CartItem'
 import { CartSummary } from '../components/CartSummary'
+import { DeliveryAddressForm } from '../components/DeliveryAddressForm'
 import { EmptyCart } from '../components/EmptyCart'
 import { DELIVERY_FEE_IN_CENTS } from '../constants'
 import { useCart } from '../hooks/useCart'
+import { checkoutSchema, type CheckoutFormInput } from '../schemas/checkoutSchema'
 import { media } from '../styles/breakpoints'
 import { calculateTotal } from '../utils/pricing'
 
@@ -45,12 +49,28 @@ const SelectedCoffeesCard = styled(Card)`
   border-radius: 6px 44px;
 `
 
-const PlaceholderText = styled.p`
-  color: ${({ theme }) => theme.colors.textMuted};
+const Form = styled.form`
+  display: contents;
 `
 
 export function Checkout() {
   const { detailedItems, subtotalInCents } = useCart()
+  const {
+    register,
+    formState: { errors },
+  } = useForm<CheckoutFormInput>({
+    resolver: zodResolver(checkoutSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      cep: '',
+      street: '',
+      number: '',
+      complement: '',
+      district: '',
+      city: '',
+      uf: '',
+    },
+  })
   const isCartEmpty = detailedItems.length === 0
   const deliveryFeeInCents = isCartEmpty ? 0 : DELIVERY_FEE_IN_CENTS
   const totalInCents = calculateTotal(subtotalInCents, DELIVERY_FEE_IN_CENTS)
@@ -63,29 +83,31 @@ export function Checkout() {
 
   return (
     <CheckoutContainer>
-      <LeftColumn>
-        <div>
-          <SectionTitle>Complete seu pedido</SectionTitle>
-          <Card>
-            <PlaceholderText>Formulário de endereço e pagamento será implementado nas próximas tarefas.</PlaceholderText>
-          </Card>
-        </div>
-      </LeftColumn>
+      <Form noValidate>
+        <LeftColumn>
+          <div>
+            <SectionTitle>Complete seu pedido</SectionTitle>
+            <Card>
+              <DeliveryAddressForm register={register} errors={errors} />
+            </Card>
+          </div>
+        </LeftColumn>
 
-      <RightColumn>
-        <div>
-          <SectionTitle>Cafés selecionados</SectionTitle>
-          <SelectedCoffeesCard>
-            {itemsList}
-            <CartSummary
-              subtotalInCents={subtotalInCents}
-              deliveryFeeInCents={deliveryFeeInCents}
-              totalInCents={totalInCents}
-              isConfirmDisabled
-            />
-          </SelectedCoffeesCard>
-        </div>
-      </RightColumn>
+        <RightColumn>
+          <div>
+            <SectionTitle>Cafés selecionados</SectionTitle>
+            <SelectedCoffeesCard>
+              {itemsList}
+              <CartSummary
+                subtotalInCents={subtotalInCents}
+                deliveryFeeInCents={deliveryFeeInCents}
+                totalInCents={totalInCents}
+                isConfirmDisabled
+              />
+            </SelectedCoffeesCard>
+          </div>
+        </RightColumn>
+      </Form>
     </CheckoutContainer>
   )
 }

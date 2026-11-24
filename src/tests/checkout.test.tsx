@@ -76,4 +76,23 @@ describe('Checkout (RF-05, RF-10, RN-09)', () => {
 
     expect(screen.getByRole('button', { name: /confirmar pedido/i })).toBeDisabled()
   })
+
+  it('shows accessible address validation errors on blur (RF-08, RN-07)', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem(
+      STORAGE_KEYS.cart,
+      JSON.stringify([{ coffeeId: 'expresso-tradicional', quantity: 1 }]),
+    )
+
+    renderCheckout()
+
+    const cepInput = screen.getByLabelText(/^cep$/i)
+    await user.click(cepInput)
+    await user.tab()
+
+    expect(screen.getByText('Informe o CEP')).toHaveAttribute('role', 'alert')
+    expect(cepInput).toHaveAttribute('aria-invalid', 'true')
+    expect(cepInput).toHaveAttribute('aria-describedby', 'cep-error')
+    expect(screen.getByLabelText(/complemento \(opcional\)/i)).toBeInTheDocument()
+  })
 })
