@@ -1,0 +1,205 @@
+# TECH_SPEC — Coffee Delivery
+
+> Especificação técnica. Explica **como** os requisitos do `PRD_SPEC.md` serão implementados.
+
+## 1. Stack e justificativas
+
+| Tecnologia | Uso | Justificativa |
+|------------|-----|---------------|
+| React + Vite + TypeScript (strict) | SPA | Exigido; build rápido; tipagem forte |
+| React Router | Rotas `/`, `/checkout`, `/success` | Exigido; navegação sem reload (RF-07) |
+| Context API + `useReducer` | Estado do carrinho | Exigido; ações previsíveis e testáveis em função pura |
+| Hooks próprios | `useCart`, `useTheme`, `useLocalStorage`, `useCep` | Reuso e isolamento de efeitos |
+| React Hook Form + Zod (+ `@hookform/resolvers`) | Formulário de endereço | Exigido; schema único de validação |
+| styled-components | Estilos e tema | Recomendado pelo enunciado; `ThemeProvider` facilita tokens light/dark |
+| ViaCEP (fetch) | Consulta de CEP | API pública exigida (RF-08) |
+| Vitest + React Testing Library + jsdom | Testes | Integração nativa com Vite |
+| ESLint + Prettier | Qualidade | Código consistente |
+| Vercel (ou Netlify) | Deploy | Exigido; exige regra de rewrite para SPA |
+
+## 2. Arquitetura
+
+Camadas com responsabilidades separadas:
+
+- **data/**: catálogo estático tipado.
+- **types/**: interfaces de domínio.
+- **utils/**: funções puras (centavos → BRL, subtotal, total, máscara de CEP).
+- **reducers/**: `cartReducer` puro e imutável.
+- **contexts/**: `CartProvider` (reducer + persistência) e `ThemeProvider`.
+- **hooks/**: acesso tipado aos contextos e lógica reutilizável.
+- **schemas/**: schema Zod do checkout.
+- **components/**: UI reutilizável, sem regra de negócio.
+- **pages/**: composição de componentes por rota (`Home`, `Checkout`, `Success`).
+- **styles/**: tokens, temas, `GlobalStyle`, breakpoints.
+
+`App.tsx` apenas monta providers e rotas.
+
+### Estrutura de diretórios
+
+```txt
+coffee-delivery/
+├── public/                  # favicon, vercel.json (ou _redirects)
+├── src/
+│   ├── assets/              # logo (light/dark), imagens dos cafés
+│   ├── components/          # Header, ThemeToggle, CoffeeCard, CoffeeCatalog, QuantityInput,
+│   │                        # CartBadge, CartItem, CartSummary, DeliveryAddressForm,
+│   │                        # PaymentMethodSelector, OrderSuccess, EmptyCart, PageLayout
+│   ├── pages/               # Home, Checkout, Success
+│   ├── contexts/            # CartContext, ThemeContext
+│   ├── reducers/            # cartReducer
+│   ├── hooks/               # useCart, useTheme, useLocalStorage, useCep
+│   ├── data/                # coffees.ts
+│   ├── types/               # coffee.ts, cart.ts, order.ts
+│   ├── schemas/             # checkoutSchema.ts
+│   ├── utils/               # money.ts, pricing.ts, storage.ts
+│   ├── styles/              # themes (light/dark), GlobalStyle, breakpoints
+│   ├── tests/               # testes de integração
+│   ├── App.tsx
+│   └── main.tsx
+├── docs/                    # PRD_SPEC, TECH_SPEC, TASKS_SPEC, AI_USAGE
+├── AGENTS.md
+└── README.md
+```
+
+## 3. Modelo de dados
+
+```ts
+type CoffeeTag = 'tradicional' | 'especial' | 'com leite' | 'alcoólico' | 'gelado'
+
+interface Coffee {
+  id: string
+  name: string
+  description: string
+  priceInCents: number
+  image: string
+  tags: CoffeeTag[]
+}
+
+// O carrinho guarda só id + quantidade; nome e preço vêm do catálogo (evita preço defasado no storage)
+interface CartItem { coffeeId: string; quantity: number }
+
+type PaymentMethod = 'credit' | 'debit' | 'cash'
+
+interface DeliveryAddress {
+  cep: string
+  street: string
+  number: string
+  complement?: string
+  district: string
+  city: string
+  uf: string
+}
+
+// Snapshot imutável do pedido concluído (RN-06)
+interface Order {
+  id: string
+  createdAt: string
+  items: { coffeeId: string; name: string; unitPriceInCents: number; quantity: number }[]
+  address: DeliveryAddress
+  payment: PaymentMethod
+  subtotalInCents: number
+  deliveryFeeInCents: number
+  totalInCents: number
+}
+```
+
+## 4. Estado global do carrinho
+
+`cartReducer(state: CartItem[], action: CartAction): CartItem[]`
+
+| Ação | Payload | Comportamento |
+|------|---------|---------------|
+| `ADD_ITEM` | `coffeeId, quantity` | Soma na linha existente ou cria nova (RN-02); ignora `quantity < 1` |
+| `INCREMENT` | `coffeeId` | `+1` até o máximo definido |
+| `DECREMENT` | `coffeeId` | `-1`, nunca abaixo de 1 (RN-01) |
+| `REMOVE` | `coffeeId` | Remove a linha |
+| `CLEAR` | — | Retorna `[]` |
+
+Regras: apenas `map`, `filter`, `find`, `reduce` e spread; nunca `push`/mutação.
+
+`CartProvider` expõe: `items`, `totalUnits`, `add`, `increment`, `decrement`, `remove`, `clear`, mais o subtotal derivado via `utils/pricing`. Estado inicial via inicializador lazy lendo `localStorage` com `try/catch` e validação de formato; efeito grava a cada mudança. Chaves: `coffee-delivery:cart`, `coffee-delivery:theme`, `coffee-delivery:last-order`.
+
+## 5. Cálculos e formatação (RN-03, RN-04)
+
+- `DELIVERY_FEE_IN_CENTS = 350` em um único módulo.
+- `subtotal = items.reduce((sum, i) => sum + price(i.coffeeId) * i.quantity, 0)`.
+- `formatBRL(cents)` usa `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })` sobre `cents / 100` **somente na exibição**.
+- Item cujo `coffeeId` não existe no catálogo é descartado na hidratação (RN-10).
+
+## 6. Rotas
+
+| Rota | Página | Observação |
+|------|--------|------------|
+| `/` | Home | Hero + catálogo |
+| `/checkout` | Checkout | Itens, endereço, pagamento, totais; `EmptyCart` se vazio |
+| `/success` | Success | Lê `last-order`; estado vazio se não houver |
+| `*` | NotFound | Link para a Home |
+
+Deploy: `vercel.json` com rewrite de todas as rotas para `/index.html` (ou `_redirects` no Netlify).
+
+## 7. Formulário e validação
+
+Schema Zod (`checkoutSchema`):
+
+- `cep`: 8 dígitos, aceita `00000-000` ou `00000000`, normalizado.
+- `street`, `district`, `city`: string não vazia (trim).
+- `number`: string não vazia.
+- `complement`: opcional.
+- `uf`: uma das 27 UFs, 2 letras.
+- `payment`: enum `credit | debit | cash` com mensagem "Selecione a forma de pagamento".
+
+React Hook Form com `zodResolver`, `mode: 'onBlur'` (revalida no change após o primeiro erro). Erros ligados ao input via `aria-describedby` e `aria-invalid`.
+
+### Consulta de CEP (`useCep`)
+
+1. Quando o CEP tiver 8 dígitos válidos, chama `https://viacep.com.br/ws/{cep}/json/`.
+2. Usa `AbortController` para cancelar consulta anterior e limpar no unmount.
+3. Estados: `idle | loading | success | notFound | error`.
+4. Resposta `{ "erro": true }` → `notFound`; falha de rede/HTTP → `error`.
+5. Em sucesso: `setValue` de `street`, `district`, `city`, `uf` (e foco no campo número). Em `notFound`/`error`: mensagem acessível e campos liberados para preenchimento manual.
+
+## 8. Tema, tokens e responsividade
+
+- Tokens semânticos: `background`, `surface`, `surfaceAlt`, `text`, `textMuted`, `border`, `primary`, `primaryContrast`, `accent`, `danger`, `success`, `focusRing`. Dois objetos de tema (`lightTheme`, `darkTheme`) com o mesmo formato tipado (`DefaultTheme`).
+- `ThemeProvider` próprio: lê `localStorage` → fallback `prefers-color-scheme` → persiste ao alternar → aplica `data-theme` no `<html>`.
+- Breakpoints (mobile-first): base ≤ 480; `tablet` ≥ 768; `desktop` ≥ 1024; conteúdo máximo ≈ 1120 px.
+- Grid de cafés: 1 coluna (≤ 480), 2 (≥ 640), 3 (≥ 900), 4 (≥ 1120). Checkout em coluna única no mobile (resumo após formulário, ou resumo fixo ao final).
+- Acessibilidade: landmarks (`header`, `main`), `button` real para ações, `label` visível por campo, `aria-live="polite"` para status do CEP e do carrinho, foco visível nos dois temas, `prefers-reduced-motion` respeitado.
+
+## 9. Estratégia de testes
+
+| Camada | Ferramenta | O que cobrir | Requisitos |
+|--------|------------|--------------|------------|
+| Unitário | Vitest | `formatBRL`, subtotal/total, `cartReducer` (todas as ações, imutabilidade, limites) | RF-03, RF-05, RF-10, RN-01..04 |
+| Unitário | Vitest | `checkoutSchema` (válidos e inválidos) | RF-08, RF-09 |
+| Hook | Vitest + RTL | `useLocalStorage` com JSON corrompido; `useCep` com `fetch` mockado (sucesso, não encontrado, falha) | RF-06, RF-08 |
+| Integração | RTL + MemoryRouter | Adicionar ao carrinho, badge, checkout bloqueado, fluxo até sucesso, carrinho limpo | RF-02..05, RF-11..13 |
+| Integração | RTL | Alternar tema e persistir | RF-14 |
+| Manual | Navegador | Responsividade, contraste, teclado, refresh nas 3 rotas, deploy | RF-07, RF-15, RNF-01 |
+| Opcional | Playwright | Fluxo de compra completo | extra |
+
+Scripts: `dev`, `build`, `preview`, `lint`, `test`, `test:run`.
+
+## 10. Execução
+
+```bash
+npm install
+npm run dev        # desenvolvimento
+npm run build      # build de produção
+npm run lint
+npm run test:run
+```
+
+## 11. Rastreabilidade
+
+| Requisito | Onde é atendido |
+|-----------|-----------------|
+| RF-01..02 | `CoffeeCatalog`, `CoffeeCard`, `QuantityInput`, `data/coffees.ts` |
+| RF-03..05 | `cartReducer`, `CartContext`, `CartBadge`, `CartItem` |
+| RF-06 | `useLocalStorage`, `CartProvider` |
+| RF-07 | `App.tsx`, `vercel.json` |
+| RF-08 | `DeliveryAddressForm`, `checkoutSchema`, `useCep` |
+| RF-09..13 | `PaymentMethodSelector`, `CartSummary`, `utils/pricing`, `Checkout`, `Success` |
+| RF-14 | `ThemeContext`, `ThemeToggle`, `styles/themes` |
+| RF-15 | breakpoints e layouts por página |
+| RF-16 | `assets/`, `Header`, favicon, README |
