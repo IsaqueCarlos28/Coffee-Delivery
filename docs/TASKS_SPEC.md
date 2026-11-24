@@ -28,7 +28,7 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | T-19 | [x] | Acessibilidade e dark mode em todas as telas (foco, contraste, `aria-*`, labels) | RF-14, RNF-01 | todos os componentes | Checklist de a11y do `QA_CHECKLIST.md` sem pendências |
 | T-20 | [x] | Testes de integração do fluxo de compra e do tema | RF-02..05, RF-11..14 | `tests/*` | Testes passam; fluxo feliz e 3 fluxos de erro cobertos |
 | T-21 | [x] | Deploy (Vercel/Netlify) com rewrite de SPA | RF-07, RNF-06 | `vercel.json` ou `public/_redirects` | URL pública abre as 4 rotas (`/`, `/checkout`, `/success`, `*`) por acesso direto; smoke test nos navegadores alvo |
-| T-22 | [ ] | README, screenshots (desktop, mobile, dark mode), seção "Branding com IA" resumida no README e registro detalhado em `docs/AI_USAGE.md` (≥ 3 interações, incluindo geração da logo), atualização dos SPEC | RF-16, RNF-07 | `README.md`, `docs/AI_USAGE.md`, `docs/*`, `docs/screenshots/*` | README tem seção "Branding com IA" resumida; `docs/AI_USAGE.md` tem registro detalhado; todos os itens da seção 11 do enunciado presentes |
+| T-22 | [x] | README, screenshots (desktop, mobile, dark mode), seção "Branding com IA" resumida no README e registro detalhado em `docs/AI_USAGE.md` (≥ 3 interações, incluindo geração da logo), atualização dos SPEC | RF-16, RNF-07 | `README.md`, `docs/AI_USAGE.md`, `docs/*`, `docs/screenshots/*` | README tem seção "Branding com IA" resumida; `docs/AI_USAGE.md` tem registro detalhado; todos os itens da seção 11 do enunciado presentes |
 | T-23 | [ ] | Revisão final: QA completo, console limpo, `build/lint/test`, ensaio da explicação oral | todos (incl. RNF-03, RNF-06) | — | Checklist de validação final 100%; desempenho básico e compatibilidade verificados |
 
 ## Registro de execução
@@ -55,3 +55,4 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | T-18/T-19 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (14 arquivos, 56 testes); `npm run build` OK; auditoria estática, correções de responsividade/a11y e reduced-motion | `fix: ajusta responsividade e acessibilidade (T-18/T-19)` |
 | T-20 | 2026-11-24 | `npm run test:run -- --coverage` OK (15 arquivos, 63 testes); Stmts 92.23% Branch 84.08% Funcs 95.33% Lines 95.41% | `test: adiciona testes de integracao e cobertura (T-20)` |
 | T-21 | 2026-11-24 | `npm run build` OK; `vite preview` local: `/checkout` e `/success` retornaram 200; `vercel.json` com rewrite SPA | `chore: adiciona rewrite de SPA para deploy (T-21)` |
+| T-22 | 2026-11-24 | README, docs/AI_USAGE.md e docs/screenshots/.gitkeep gerados com placeholders; sem evidências/screenshots inventadas | `docs: cria README e modelo de AI_USAGE (T-22)` |
