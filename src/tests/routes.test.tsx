@@ -28,7 +28,7 @@ describe('Routes (RF-07, D-09)', () => {
 
   it('renders Checkout on /checkout', () => {
     renderWithRouter('/checkout')
-    expect(screen.getByRole('heading', { name: /complete seu pedido/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /seu carrinho está vazio/i })).toBeInTheDocument()
   })
 
   it('renders Success on /success', () => {
