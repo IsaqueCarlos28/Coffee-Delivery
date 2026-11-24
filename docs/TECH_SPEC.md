@@ -16,6 +16,8 @@
 | Vitest + React Testing Library + jsdom | Testes | Integração nativa com Vite |
 | ESLint + Prettier | Qualidade | Código consistente |
 | Vercel (ou Netlify) | Deploy | Exigido; exige regra de rewrite para SPA |
+| Playwright + @playwright/test | E2E (extra aprovado) | Aprovado pelo aluno para T-01; complementa testes de integração |
+| @playwright/mcp (via opencode.jsonc) | MCP de browser para agente | Aprovado pelo aluno para T-01; habilita automação/inspeção via MCP no projeto |
 
 ## 2. Arquitetura
 
@@ -59,6 +61,8 @@ coffee-delivery/
 │   └── main.tsx
 ├── docs/                    # PRD_SPEC, TECH_SPEC, TASKS_SPEC, AI_USAGE
 ├── AGENTS.md
+├── opencode.jsonc           # configuração MCP do projeto (Playwright MCP)
+├── playwright.config.ts
 └── README.md
 ```
 
@@ -185,9 +189,9 @@ React Hook Form com `zodResolver`, `mode: 'onBlur'` (revalida no change após o 
 | Integração | RTL + MemoryRouter | Adicionar ao carrinho, badge, checkout bloqueado, fluxo até sucesso, carrinho limpo | RF-02..05, RF-11..13 |
 | Integração | RTL | Alternar tema e persistir | RF-14 |
 | Manual | Navegador | Responsividade, contraste, teclado, refresh nas 4 rotas, deploy, compatibilidade (Chrome, Firefox, Safari, Edge), checagem básica de desempenho/imagens | RF-07, RF-15, RNF-01, RNF-03, RNF-06 |
-| Opcional | Playwright | Fluxo de compra completo | extra |
+| E2E (aprovado) | Playwright | Fluxo de compra completo (configurado na T-01; cenários expandidos depois) | extra aprovado |
 
-Scripts: `dev`, `build`, `preview`, `lint`, `test`, `test:run`.
+Scripts: `dev`, `build`, `preview`, `lint`, `test`, `test:run`, `test:e2e`, `test:e2e:ui`.
 
 ## 10. Execução
 
