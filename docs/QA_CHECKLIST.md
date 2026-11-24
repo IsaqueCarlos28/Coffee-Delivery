@@ -24,16 +24,16 @@
 |-----------|--------------------|--------------|
 | RF-01 | Renderiza todos os cafés com 5 campos | Comparar com Figma |
 | RF-02 | `QuantityInput`: 0, negativo, decimal, 99, 100 | Teclado e toque |
-| RF-03 | Reducer: soma sem duplicar | Adicionar o mesmo café 3x |
+| RF-03 | Reducer: soma sem duplicar; teto 99 por linha | Adicionar o mesmo café 3x; 60+60 deve resultar em 99 |
 | RF-04 | Badge soma unidades; some em 0 | Conferir no Header em todas as rotas |
-| RF-05 | Reducer INC/DEC/REMOVE; totais | Remover o último item → estado vazio |
+| RF-05 | Reducer INC/DEC/REMOVE; totais; teto 99 por linha | Remover o último item → estado vazio; `+` desabilita em 99; INCREMENT no-op em 99 |
 | RF-06 | `useLocalStorage`: válido, corrompido, indisponível | F5 com itens; editar o storage à mão |
-| RF-07 | MemoryRouter: 3 rotas e NotFound | Abrir cada URL direto no deploy |
+| RF-07 | MemoryRouter: 4 rotas (`/`, `/checkout`, `/success`, `*`) | Abrir cada URL direto no deploy, incluindo rota inexistente |
 | RF-08 | Schema + `useCep` (sucesso, não encontrado, falha) | CEP real, CEP inexistente, offline |
 | RF-09 | Schema exige pagamento | Setas do teclado no radio |
 | RF-10 | 29,70 + 3,50 = 33,20 e outros casos | Conferir visualmente |
 | RF-11 | Bloqueio com carrinho vazio e form inválido | Foco no 1º erro; leitor de tela |
-| RF-12 | Sucesso mostra endereço e pagamento | Comparar com Figma |
+| RF-12 | Sucesso mostra endereço, pagamento e previsão de entrega | Comparar com Figma; conferir `DELIVERY_ETA` |
 | RF-13 | Carrinho `[]` após confirmar; sucesso intacto | Voltar à Home: badge zerado |
 | RF-14 | Alternância + persistência + fallback do sistema | Em todas as telas e estados |
 | RF-15 | — | 320 / 375 / 390 / 768 / 1280 / 1440 |

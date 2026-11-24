@@ -7,7 +7,7 @@
 | Tecnologia | Uso | Justificativa |
 |------------|-----|---------------|
 | React + Vite + TypeScript (strict) | SPA | Exigido; build rápido; tipagem forte |
-| React Router | Rotas `/`, `/checkout`, `/success` | Exigido; navegação sem reload (RF-07) |
+| React Router | Rotas `/`, `/checkout`, `/success`, `*` (NotFound) | Exigido; navegação sem reload (RF-07) |
 | Context API + `useReducer` | Estado do carrinho | Exigido; ações previsíveis e testáveis em função pura |
 | Hooks próprios | `useCart`, `useTheme`, `useLocalStorage`, `useCep` | Reuso e isolamento de efeitos |
 | React Hook Form + Zod (+ `@hookform/resolvers`) | Formulário de endereço | Exigido; schema único de validação |
@@ -44,14 +44,15 @@ coffee-delivery/
 │   ├── components/          # Header, ThemeToggle, CoffeeCard, CoffeeCatalog, QuantityInput,
 │   │                        # CartBadge, CartItem, CartSummary, DeliveryAddressForm,
 │   │                        # PaymentMethodSelector, OrderSuccess, EmptyCart, PageLayout
-│   ├── pages/               # Home, Checkout, Success
+│   ├── pages/               # Home, Checkout, Success, NotFound
 │   ├── contexts/            # CartContext, ThemeContext
 │   ├── reducers/            # cartReducer
 │   ├── hooks/               # useCart, useTheme, useLocalStorage, useCep
 │   ├── data/                # coffees.ts
 │   ├── types/               # coffee.ts, cart.ts, order.ts
 │   ├── schemas/             # checkoutSchema.ts
-│   ├── utils/               # money.ts, pricing.ts, storage.ts
+│   ├── utils/               # money.ts, pricing.ts, storage.ts, order.ts
+│   ├── constants.ts         # DELIVERY_FEE_IN_CENTS, MAX_QUANTITY, DELIVERY_ETA, HEADER_LOCATION, STORAGE_KEYS
 │   ├── styles/              # themes (light/dark), GlobalStyle, breakpoints
 │   ├── tests/               # testes de integração
 │   ├── App.tsx
@@ -78,6 +79,9 @@ interface Coffee {
 // O carrinho guarda só id + quantidade; nome e preço vêm do catálogo (evita preço defasado no storage)
 interface CartItem { coffeeId: string; quantity: number }
 
+// Item enriquecido para UI/cálculo (não persiste no storage)
+interface DetailedCartItem extends CartItem { coffee: Coffee }
+
 type PaymentMethod = 'credit' | 'debit' | 'cash'
 
 interface DeliveryAddress {
@@ -92,8 +96,8 @@ interface DeliveryAddress {
 
 // Snapshot imutável do pedido concluído (RN-06)
 interface Order {
-  id: string
-  createdAt: string
+  id: string              // ex.: crypto.randomUUID()
+  createdAt: string       // ISO string
   items: { coffeeId: string; name: string; unitPriceInCents: number; quantity: number }[]
   address: DeliveryAddress
   payment: PaymentMethod
@@ -109,20 +113,25 @@ interface Order {
 
 | Ação | Payload | Comportamento |
 |------|---------|---------------|
-| `ADD_ITEM` | `coffeeId, quantity` | Soma na linha existente ou cria nova (RN-02); ignora `quantity < 1` |
-| `INCREMENT` | `coffeeId` | `+1` até o máximo definido |
+| `ADD_ITEM` | `coffeeId, quantity` | Ignora payload inválido (`quantity < 1` ou não inteiro); normaliza `quantity` para `1..MAX_QUANTITY`; soma na linha existente ou cria nova (RN-02); teto por linha: `min(MAX_QUANTITY, existente + qtdNormalizada)` (D-03) |
+| `INCREMENT` | `coffeeId` | `+1` até `MAX_QUANTITY`; no-op em 99 e o botão `+` fica desabilitado (D-03) |
 | `DECREMENT` | `coffeeId` | `-1`, nunca abaixo de 1 (RN-01) |
 | `REMOVE` | `coffeeId` | Remove a linha |
 | `CLEAR` | — | Retorna `[]` |
 
-Regras: apenas `map`, `filter`, `find`, `reduce` e spread; nunca `push`/mutação.
+Regras: apenas `map`, `filter`, `find`, `reduce` e spread; nunca `push`/mutação. `MAX_QUANTITY = 99` vem de `src/constants.ts`.
 
-`CartProvider` expõe: `items`, `totalUnits`, `add`, `increment`, `decrement`, `remove`, `clear`, mais o subtotal derivado via `utils/pricing`. Estado inicial via inicializador lazy lendo `localStorage` com `try/catch` e validação de formato; efeito grava a cada mudança. Chaves: `coffee-delivery:cart`, `coffee-delivery:theme`, `coffee-delivery:last-order`.
+**Contrato de carrinho e precificação (A6):**
+- `utils/pricing.ts` recebe `items` e `catalog` por parâmetro (funções puras), sem importar dados globais.
+- `CartProvider` importa `data/coffees.ts`, descarta ids desconhecidos na hidratação (RN-10) e expõe `items`, `detailedItems` (item + `coffee` do catálogo), `totalUnits`, `subtotalInCents`, `add`, `increment`, `decrement`, `remove`, `clear`.
+- Estado inicial via inicializador lazy lendo `localStorage` com `try/catch` e validação de formato; efeito grava a cada mudança.
+- Chaves em `STORAGE_KEYS` (`src/constants.ts`): `coffee-delivery:cart`, `coffee-delivery:theme`, `coffee-delivery:last-order`.
 
 ## 5. Cálculos e formatação (RN-03, RN-04)
 
-- `DELIVERY_FEE_IN_CENTS = 350` em um único módulo.
-- `subtotal = items.reduce((sum, i) => sum + price(i.coffeeId) * i.quantity, 0)`.
+- Constantes em `src/constants.ts`: `DELIVERY_FEE_IN_CENTS = 350` (D-01), `MAX_QUANTITY = 99` (D-03), `DELIVERY_ETA = "20 min - 30 min"` (D-10), `HEADER_LOCATION = "Porto Alegre, RS"` (D-09), `STORAGE_KEYS`.
+- `utils/pricing.ts` expõe funções puras que recebem `items` e `catalog` por parâmetro (A6), ex.: `getSubtotalInCents(items, catalog)` e `getTotalInCents(subtotalInCents, deliveryFeeInCents = DELIVERY_FEE_IN_CENTS)`.
+- `subtotal = items.reduce((sum, i) => sum + coffee.priceInCents * i.quantity, 0)`, onde `coffee` vem do `catalog` recebido.
 - `formatBRL(cents)` usa `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })` sobre `cents / 100` **somente na exibição**.
 - Item cujo `coffeeId` não existe no catálogo é descartado na hidratação (RN-10).
 
@@ -161,7 +170,7 @@ React Hook Form com `zodResolver`, `mode: 'onBlur'` (revalida no change após o 
 ## 8. Tema, tokens e responsividade
 
 - Tokens semânticos: `background`, `surface`, `surfaceAlt`, `text`, `textMuted`, `border`, `primary`, `primaryContrast`, `accent`, `danger`, `success`, `focusRing`. Dois objetos de tema (`lightTheme`, `darkTheme`) com o mesmo formato tipado (`DefaultTheme`).
-- `ThemeProvider` próprio: lê `localStorage` → fallback `prefers-color-scheme` → persiste ao alternar → aplica `data-theme` no `<html>`.
+- `ThemeProvider` próprio: lê `localStorage` (`STORAGE_KEYS.theme`) → fallback `prefers-color-scheme` → persiste ao alternar → aplica `data-theme` no `<html>`. Para evitar FOUC, `index.html` inclui script inline (antes da primeira renderização) que lê a chave de tema e define `data-theme` no `<html>` antes do React montar (T-07).
 - Breakpoints (mobile-first): base ≤ 480; `tablet` ≥ 768; `desktop` ≥ 1024; conteúdo máximo ≈ 1120 px.
 - Grid de cafés: 1 coluna (≤ 480), 2 (≥ 640), 3 (≥ 900), 4 (≥ 1120). Checkout em coluna única no mobile (resumo após formulário, ou resumo fixo ao final).
 - Acessibilidade: landmarks (`header`, `main`), `button` real para ações, `label` visível por campo, `aria-live="polite"` para status do CEP e do carrinho, foco visível nos dois temas, `prefers-reduced-motion` respeitado.
@@ -170,12 +179,12 @@ React Hook Form com `zodResolver`, `mode: 'onBlur'` (revalida no change após o 
 
 | Camada | Ferramenta | O que cobrir | Requisitos |
 |--------|------------|--------------|------------|
-| Unitário | Vitest | `formatBRL`, subtotal/total, `cartReducer` (todas as ações, imutabilidade, limites) | RF-03, RF-05, RF-10, RN-01..04 |
+| Unitário | Vitest | `formatBRL`, subtotal/total (funções puras com `catalog`), `cartReducer` (todas as ações, imutabilidade, limites, teto 99 por linha) | RF-03, RF-05, RF-10, RN-01..04, D-03 |
 | Unitário | Vitest | `checkoutSchema` (válidos e inválidos) | RF-08, RF-09 |
 | Hook | Vitest + RTL | `useLocalStorage` com JSON corrompido; `useCep` com `fetch` mockado (sucesso, não encontrado, falha) | RF-06, RF-08 |
 | Integração | RTL + MemoryRouter | Adicionar ao carrinho, badge, checkout bloqueado, fluxo até sucesso, carrinho limpo | RF-02..05, RF-11..13 |
 | Integração | RTL | Alternar tema e persistir | RF-14 |
-| Manual | Navegador | Responsividade, contraste, teclado, refresh nas 3 rotas, deploy | RF-07, RF-15, RNF-01 |
+| Manual | Navegador | Responsividade, contraste, teclado, refresh nas 4 rotas, deploy, compatibilidade (Chrome, Firefox, Safari, Edge), checagem básica de desempenho/imagens | RF-07, RF-15, RNF-01, RNF-03, RNF-06 |
 | Opcional | Playwright | Fluxo de compra completo | extra |
 
 Scripts: `dev`, `build`, `preview`, `lint`, `test`, `test:run`.
@@ -197,9 +206,11 @@ npm run test:run
 | RF-01..02 | `CoffeeCatalog`, `CoffeeCard`, `QuantityInput`, `data/coffees.ts` |
 | RF-03..05 | `cartReducer`, `CartContext`, `CartBadge`, `CartItem` |
 | RF-06 | `useLocalStorage`, `CartProvider` |
-| RF-07 | `App.tsx`, `vercel.json` |
+| RF-07 | `App.tsx`, `pages/NotFound` (ou equivalente), `vercel.json` |
 | RF-08 | `DeliveryAddressForm`, `checkoutSchema`, `useCep` |
-| RF-09..13 | `PaymentMethodSelector`, `CartSummary`, `utils/pricing`, `Checkout`, `Success` |
-| RF-14 | `ThemeContext`, `ThemeToggle`, `styles/themes` |
+| RF-09..13 | `PaymentMethodSelector`, `CartSummary`, `utils/pricing`, `utils/order.ts`, `constants.ts`, `Checkout`, `Success` (inclui ETA D-10) |
+| RF-14 | `ThemeContext`, `ThemeToggle`, `styles/themes`, script inline de tema em `index.html` |
 | RF-15 | breakpoints e layouts por página |
-| RF-16 | `assets/`, `Header`, favicon, README |
+| RF-16 | `assets/`, `Header`, favicon, seção "Branding com IA" no `README.md`, registro detalhado em `docs/AI_USAGE.md` |
+| RNF-03 | imagens otimizadas com `width/height`, carregamento leve, revisão de re-render |
+| RNF-06 | validação manual nas últimas versões de Chrome, Firefox, Safari e Edge |
