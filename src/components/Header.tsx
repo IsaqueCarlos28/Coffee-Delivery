@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import logoDark from '../assets/logo-dark.svg'
+import logoLight from '../assets/logo-light.svg'
 import { HEADER_LOCATION } from '../constants'
 import { useCart } from '../hooks/useCart'
+import { useTheme } from '../hooks/useTheme'
 import { media } from '../styles/breakpoints'
 import { CartBadge } from './CartBadge'
 import { ThemeToggle } from './ThemeToggle'
@@ -30,11 +33,12 @@ const HeaderContent = styled.div`
 const LogoLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: 'Baloo 2', cursive;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.text};
+`
+
+const LogoImage = styled.img`
+  display: block;
+  height: 2.5rem;
+  width: auto;
 `
 
 const Actions = styled.div`
@@ -70,16 +74,18 @@ const CartLink = styled(Link)`
 
 export function Header() {
   const { totalUnits } = useCart()
+  const { theme } = useTheme()
   const cartLabel =
     totalUnits > 0
       ? `Ir para o carrinho, ${totalUnits} ${totalUnits === 1 ? 'item' : 'itens'}`
       : 'Ir para o carrinho'
+  const logoSrc = theme === 'dark' ? logoDark : logoLight
 
   return (
     <HeaderContainer>
       <HeaderContent>
         <LogoLink to="/" aria-label="Coffee Delivery - ir para a página inicial">
-          Coffee Delivery
+          <LogoImage src={logoSrc} alt="Coffee Delivery" width={387} height={128} />
         </LogoLink>
 
         <Actions>
