@@ -33,7 +33,7 @@ describe('Routes (RF-07, D-09)', () => {
 
   it('renders Success on /success', () => {
     renderWithRouter('/success')
-    expect(screen.getByRole('heading', { name: /uhu! pedido confirmado/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /nenhum pedido confirmado/i })).toBeInTheDocument()
   })
 
   it('renders NotFound on unknown route', () => {

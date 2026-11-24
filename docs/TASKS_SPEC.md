@@ -23,7 +23,7 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | T-14 | [x] | `useCep` com ViaCEP (loading, não encontrado, falha, abort) e preenchimento automático | RF-08, RN-07 | `hooks/useCep.ts` + testes com `fetch` mockado | CEP real preenche 4 campos; erros tratados e campos editáveis |
 | T-15 | [x] | `PaymentMethodSelector` (crédito, débito, dinheiro) integrado ao formulário | RF-09, RN-05 | `PaymentMethodSelector` | Sem seleção, não envia; navegável por teclado |
 | T-16 | [x] | Confirmar pedido: validar, montar `Order` (snapshot), salvar `last-order`, limpar carrinho, navegar | RF-11, RF-12, RF-13, RN-06, RN-10 | `pages/Checkout`, `utils/order.ts` | Carrinho vazio/inválido não confirma; carrinho zerado após sucesso |
-| T-17 | [ ] | Página de sucesso com resumo e estado vazio | RF-12, RN-09, D-10 | `pages/Success`, `OrderSuccess` | Endereço, pagamento e previsão de entrega (`DELIVERY_ETA`) corretos; refresh mantém; sem pedido mostra vazio |
+| T-17 | [x] | Página de sucesso com resumo e estado vazio | RF-12, RN-09, D-10 | `pages/Success`, `OrderSuccess` | Endereço, pagamento e previsão de entrega (`DELIVERY_ETA`) corretos; refresh mantém; sem pedido mostra vazio |
 | T-18 | [ ] | Responsividade completa (320, 375/390, 768, 1280/1440) | RF-15, RNF-02 | estilos de todas as páginas | Sem rolagem horizontal; toque confortável; fluxo completo no mobile |
 | T-19 | [ ] | Acessibilidade e dark mode em todas as telas (foco, contraste, `aria-*`, labels) | RF-14, RNF-01 | todos os componentes | Checklist de a11y do `QA_CHECKLIST.md` sem pendências |
 | T-20 | [ ] | Testes de integração do fluxo de compra e do tema | RF-02..05, RF-11..14 | `tests/*` | Testes passam; fluxo feliz e 3 fluxos de erro cobertos |
@@ -51,3 +51,4 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | T-14 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (12 arquivos, 49 testes); `npm run build` OK; ViaCEP com abort, 4 cenários mockados e campos editáveis | `feat: adiciona consulta de CEP com ViaCEP (T-14)` |
 | T-15 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (12 arquivos, 50 testes); `npm run build` OK; radio group acessível, sem pré-seleção, integrado ao formulário/schema | `feat: adiciona seletor de pagamento (T-15)` |
 | T-16 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (14 arquivos, 56 testes); `npm run build` OK; Order snapshot, last-order, clear, navegação e bloqueios cobertos | `feat: confirma pedido e cria snapshot (T-16)` |
+| T-17 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (14 arquivos, 56 testes); `npm run build` OK; Success lê last-order, mostra ETA/pgto/endereço e estado vazio | `feat: implementa pagina de sucesso do pedido (T-17)` |
