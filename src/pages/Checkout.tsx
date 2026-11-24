@@ -1,15 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { CartItem } from '../components/CartItem'
 import { CartSummary } from '../components/CartSummary'
 import { DeliveryAddressForm } from '../components/DeliveryAddressForm'
 import { EmptyCart } from '../components/EmptyCart'
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector'
-import { DELIVERY_FEE_IN_CENTS } from '../constants'
+import { DELIVERY_FEE_IN_CENTS, STORAGE_KEYS } from '../constants'
 import { useCart } from '../hooks/useCart'
-import { checkoutSchema, type CheckoutFormInput } from '../schemas/checkoutSchema'
+import {
+  checkoutSchema,
+  type CheckoutFormData,
+  type CheckoutFormInput,
+} from '../schemas/checkoutSchema'
 import { media } from '../styles/breakpoints'
+import { buildOrder } from '../utils/order'
 import { calculateTotal } from '../utils/pricing'
 
 const CheckoutContainer = styled.div`
@@ -55,14 +61,16 @@ const Form = styled.form`
 `
 
 export function Checkout() {
-  const { detailedItems, subtotalInCents } = useCart()
+  const { detailedItems, subtotalInCents, clear } = useCart()
+  const navigate = useNavigate()
   const {
     register,
     watch,
     setValue,
     setFocus,
+    handleSubmit,
     formState: { errors },
-  } = useForm<CheckoutFormInput>({
+  } = useForm<CheckoutFormInput, unknown, CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     mode: 'onBlur',
     defaultValues: {
@@ -80,6 +88,36 @@ export function Checkout() {
   const deliveryFeeInCents = isCartEmpty ? 0 : DELIVERY_FEE_IN_CENTS
   const totalInCents = calculateTotal(subtotalInCents, DELIVERY_FEE_IN_CENTS)
 
+  function handleConfirmOrder(data: CheckoutFormData) {
+    if (isCartEmpty) return
+
+    const order = buildOrder({
+      items: detailedItems,
+      address: {
+        cep: data.cep,
+        street: data.street,
+        number: data.number,
+        complement: data.complement,
+        district: data.district,
+        city: data.city,
+        uf: data.uf,
+      },
+      payment: data.payment,
+      subtotalInCents,
+      deliveryFeeInCents: DELIVERY_FEE_IN_CENTS,
+      totalInCents,
+    })
+
+    try {
+      window.localStorage.setItem(STORAGE_KEYS.lastOrder, JSON.stringify(order))
+    } catch {
+      // Sem persistência disponível: segue fluxo em memória.
+    }
+
+    clear()
+    navigate('/success')
+  }
+
   if (isCartEmpty) {
     return <EmptyCart />
   }
@@ -88,7 +126,7 @@ export function Checkout() {
 
   return (
     <CheckoutContainer>
-      <Form noValidate>
+      <Form noValidate onSubmit={handleSubmit(handleConfirmOrder)}>
         <LeftColumn>
           <div>
             <SectionTitle>Complete seu pedido</SectionTitle>
@@ -116,7 +154,7 @@ export function Checkout() {
                 subtotalInCents={subtotalInCents}
                 deliveryFeeInCents={deliveryFeeInCents}
                 totalInCents={totalInCents}
-                isConfirmDisabled
+                isConfirmDisabled={false}
               />
             </SelectedCoffeesCard>
           </div>

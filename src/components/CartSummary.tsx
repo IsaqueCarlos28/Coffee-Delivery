@@ -71,7 +71,7 @@ export function CartSummary({
         <span>Total</span>
         <span>{totalLabel}</span>
       </TotalRow>
-      <ConfirmButton type="button" disabled={isConfirmDisabled}>
+      <ConfirmButton type="submit" disabled={isConfirmDisabled}>
         Confirmar pedido
       </ConfirmButton>
     </SummaryContainer>

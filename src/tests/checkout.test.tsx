@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from '../AppRoutes'
 import { STORAGE_KEYS } from '../constants'
 import { CartProvider } from '../contexts/CartContext'
@@ -22,6 +22,17 @@ function renderCheckout() {
 describe('Checkout (RF-05, RF-10, RN-09)', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ erro: true }),
+      }),
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it('shows empty state when cart is empty', () => {
@@ -66,7 +77,7 @@ describe('Checkout (RF-05, RF-10, RN-09)', () => {
     expect(screen.getByText(/R\$\s*33,20/)).toBeInTheDocument()
   })
 
-  it('keeps confirm button disabled when cart is not submittable in T-12 scope', () => {
+  it('enables confirm button when cart has items (T-16)', () => {
     window.localStorage.setItem(
       STORAGE_KEYS.cart,
       JSON.stringify([{ coffeeId: 'expresso-tradicional', quantity: 1 }]),
@@ -74,7 +85,7 @@ describe('Checkout (RF-05, RF-10, RN-09)', () => {
 
     renderCheckout()
 
-    expect(screen.getByRole('button', { name: /confirmar pedido/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /confirmar pedido/i })).toBeEnabled()
   })
 
   it('shows accessible address validation errors on blur (RF-08, RN-07)', async () => {
@@ -111,5 +122,74 @@ describe('Checkout (RF-05, RF-10, RN-09)', () => {
     expect(credit).not.toBeChecked()
     expect(debit).not.toBeChecked()
     expect(cash).not.toBeChecked()
+  })
+
+  it('blocks submit with invalid form and shows accessible feedback (RF-11)', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem(
+      STORAGE_KEYS.cart,
+      JSON.stringify([{ coffeeId: 'expresso-tradicional', quantity: 1 }]),
+    )
+
+    renderCheckout()
+
+    await user.click(screen.getByRole('button', { name: /confirmar pedido/i }))
+
+    expect(screen.getByText('Informe o CEP')).toBeInTheDocument()
+    expect(screen.getByText('Selecione a forma de pagamento')).toBeInTheDocument()
+    expect(window.localStorage.getItem(STORAGE_KEYS.lastOrder)).toBeNull()
+    expect(screen.getByRole('heading', { name: /complete seu pedido/i })).toBeInTheDocument()
+  })
+
+  it('completes happy flow: saves order, clears cart, navigates to success (RF-11, RF-12, RF-13)', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem(
+      STORAGE_KEYS.cart,
+      JSON.stringify([{ coffeeId: 'expresso-tradicional', quantity: 2 }]),
+    )
+
+    renderCheckout()
+
+    await user.type(screen.getByLabelText(/^cep$/i), '30130010')
+    await user.type(screen.getByLabelText(/^rua$/i), 'Rua A')
+    await user.type(screen.getByLabelText(/^número$/i), '100')
+    await user.type(screen.getByLabelText(/^bairro$/i), 'Centro')
+    await user.type(screen.getByLabelText(/^cidade$/i), 'Belo Horizonte')
+    await user.type(screen.getByLabelText(/^uf$/i), 'MG')
+    await user.click(screen.getByLabelText(/cartão de crédito/i))
+
+    await user.click(screen.getByRole('button', { name: /confirmar pedido/i }))
+
+    expect(await screen.findByRole('heading', { name: /pedido confirmado/i })).toBeInTheDocument()
+
+    const storedOrder = window.localStorage.getItem(STORAGE_KEYS.lastOrder)
+    expect(storedOrder).not.toBeNull()
+    const order = JSON.parse(storedOrder!) as {
+      items: Array<{
+        coffeeId: string
+        name: string
+        unitPriceInCents: number
+        quantity: number
+      }>
+      payment: string
+      subtotalInCents: number
+      deliveryFeeInCents: number
+      totalInCents: number
+    }
+    expect(order.items).toEqual([
+      {
+        coffeeId: 'expresso-tradicional',
+        name: 'Expresso Tradicional',
+        unitPriceInCents: 990,
+        quantity: 2,
+      },
+    ])
+    expect(order.payment).toBe('credit')
+    expect(order.subtotalInCents).toBe(1980)
+    expect(order.deliveryFeeInCents).toBe(350)
+    expect(order.totalInCents).toBe(2330)
+
+    const storedCart = window.localStorage.getItem(STORAGE_KEYS.cart)
+    expect(storedCart).toBe('[]')
   })
 })
