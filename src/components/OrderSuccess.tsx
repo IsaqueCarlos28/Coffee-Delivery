@@ -1,4 +1,7 @@
 import styled from 'styled-components'
+import currentDollarRegularIcon from '../assets/icons/current-dollar-regular.png'
+import mapPinFillIcon from '../assets/icons/map-pin-fill.png'
+import timerFillIcon from '../assets/icons/timer-fill.png'
 import { DELIVERY_ETA } from '../constants'
 import { media } from '../styles/breakpoints'
 import type { Order } from '../types'
@@ -62,6 +65,12 @@ const IconBadge = styled.span`
   flex-shrink: 0;
 `
 
+const InfoIcon = styled.img`
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
+`
+
 const InfoText = styled.div`
   color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.3;
@@ -98,7 +107,9 @@ export function OrderSuccess({ order }: OrderSuccessProps) {
 
         <OrderInfoCard>
           <InfoRow>
-            <IconBadge aria-hidden="true">📍</IconBadge>
+            <IconBadge aria-hidden="true">
+              <InfoIcon src={mapPinFillIcon} alt="" />
+            </IconBadge>
             <InfoText>
               <p>
                 Entrega em{' '}
@@ -114,7 +125,9 @@ export function OrderSuccess({ order }: OrderSuccessProps) {
           </InfoRow>
 
           <InfoRow>
-            <IconBadge aria-hidden="true">⏱️</IconBadge>
+            <IconBadge aria-hidden="true">
+              <InfoIcon src={timerFillIcon} alt="" />
+            </IconBadge>
             <InfoText>
               <p>Previsão de entrega</p>
               <p>
@@ -124,7 +137,9 @@ export function OrderSuccess({ order }: OrderSuccessProps) {
           </InfoRow>
 
           <InfoRow>
-            <IconBadge aria-hidden="true">💲</IconBadge>
+            <IconBadge aria-hidden="true">
+              <InfoIcon src={currentDollarRegularIcon} alt="" />
+            </IconBadge>
             <InfoText>
               <p>Pagamento na entrega</p>
               <p>

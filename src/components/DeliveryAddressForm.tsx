@@ -5,6 +5,7 @@ import type {
   UseFormSetValue,
 } from 'react-hook-form'
 import styled from 'styled-components'
+import mapPinLineRegularIcon from '../assets/icons/map-pin-line-regular.png'
 import { useCep } from '../hooks/useCep'
 import type { CheckoutFormInput } from '../schemas/checkoutSchema'
 
@@ -27,10 +28,11 @@ const SectionHeader = styled.div`
   gap: 0.5rem;
 `
 
-const SectionIcon = styled.span`
-  color: ${({ theme }) => theme.colors.primary};
-  font-size: 1.25rem;
-  line-height: 1;
+const SectionIcon = styled.img`
+  width: 1.375rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  object-fit: contain;
 `
 
 const SectionTitle = styled.h3`
@@ -148,7 +150,7 @@ export function DeliveryAddressForm({
   return (
     <FormContainer>
       <SectionHeader>
-        <SectionIcon aria-hidden="true">📍</SectionIcon>
+        <SectionIcon src={mapPinLineRegularIcon} alt="" aria-hidden="true" />
         <div>
           <SectionTitle>Endereço de Entrega</SectionTitle>
           <SectionDescription>Informe o endereço onde deseja receber seu pedido</SectionDescription>

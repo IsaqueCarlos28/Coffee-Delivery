@@ -1,4 +1,8 @@
 import styled from 'styled-components'
+import coffeeFillIcon from '../assets/icons/coffee-fill.png'
+import packageFillIcon from '../assets/icons/package-fill.png'
+import shoppingCartFillIcon from '../assets/icons/shopping-cart-fill.png'
+import timerFillIcon from '../assets/icons/timer-fill.png'
 import { media } from '../styles/breakpoints'
 
 const HeroSection = styled.section`
@@ -63,8 +67,13 @@ const IconCircle = styled.span`
   border-radius: 999px;
   background: ${({ theme }) => theme.colors.accent};
   color: ${({ theme }) => theme.colors.surface};
-  font-size: 0.875rem;
   flex-shrink: 0;
+`
+
+const BenefitIcon = styled.img`
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
 `
 
 const HeroImagePlaceholder = styled.div`
@@ -82,10 +91,10 @@ const HeroImagePlaceholder = styled.div`
 `
 
 const benefits = [
-  { icon: '🛒', text: 'Compra simples e segura' },
-  { icon: '📦', text: 'Embalagem mantém o café intacto' },
-  { icon: '⏱️', text: 'Entrega rápida e rastreada' },
-  { icon: '☕', text: 'O café chega fresquinho até você' },
+  { icon: shoppingCartFillIcon, text: 'Compra simples e segura' },
+  { icon: packageFillIcon, text: 'Embalagem mantém o café intacto' },
+  { icon: timerFillIcon, text: 'Entrega rápida e rastreada' },
+  { icon: coffeeFillIcon, text: 'O café chega fresquinho até você' },
 ]
 
 export function Hero() {
@@ -100,7 +109,9 @@ export function Hero() {
           <BenefitsList>
             {benefits.map((benefit) => (
               <BenefitItem key={benefit.text}>
-                <IconCircle aria-hidden="true">{benefit.icon}</IconCircle>
+                <IconCircle aria-hidden="true">
+                  <BenefitIcon src={benefit.icon} alt="" />
+                </IconCircle>
                 <span>{benefit.text}</span>
               </BenefitItem>
             ))}

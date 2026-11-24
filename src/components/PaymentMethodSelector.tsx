@@ -1,5 +1,9 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import styled from 'styled-components'
+import bankRegularIcon from '../assets/icons/bank-regular.png'
+import creditCardRegularIcon from '../assets/icons/credit-card-regular.png'
+import currentDollarRegularIcon from '../assets/icons/current-dollar-regular.png'
+import moneyRegularIcon from '../assets/icons/money-regular.png'
 import type { CheckoutFormInput } from '../schemas/checkoutSchema'
 
 interface PaymentMethodSelectorProps {
@@ -18,10 +22,11 @@ const Header = styled.div`
   gap: 0.5rem;
 `
 
-const Icon = styled.span`
-  color: ${({ theme }) => theme.colors.accent};
-  font-size: 1.25rem;
-  line-height: 1;
+const Icon = styled.img`
+  width: 1.375rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  object-fit: contain;
 `
 
 const Title = styled.h3`
@@ -94,6 +99,13 @@ const RadioInput = styled.input`
   margin: 0;
 `
 
+const OptionIcon = styled.img`
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  object-fit: contain;
+`
+
 const ErrorMessage = styled.p`
   margin-top: 0.75rem;
   font-size: 0.75rem;
@@ -101,9 +113,9 @@ const ErrorMessage = styled.p`
 `
 
 const paymentOptions = [
-  { value: 'credit', label: 'Cartão de crédito' },
-  { value: 'debit', label: 'Cartão de débito' },
-  { value: 'cash', label: 'Dinheiro' },
+  { value: 'credit', label: 'Cartão de crédito', icon: creditCardRegularIcon },
+  { value: 'debit', label: 'Cartão de débito', icon: bankRegularIcon },
+  { value: 'cash', label: 'Dinheiro', icon: moneyRegularIcon },
 ] as const
 
 export function PaymentMethodSelector({ register, errors }: PaymentMethodSelectorProps) {
@@ -113,10 +125,12 @@ export function PaymentMethodSelector({ register, errors }: PaymentMethodSelecto
   return (
     <Container>
       <Header>
-        <Icon aria-hidden="true">💲</Icon>
+        <Icon src={currentDollarRegularIcon} alt="" aria-hidden="true" />
         <div>
           <Title>Pagamento</Title>
-          <Description>O pagamento é feito na entrega. Escolha a forma que deseja pagar</Description>
+          <Description>
+            O pagamento é feito na entrega. Escolha a forma que deseja pagar
+          </Description>
         </div>
       </Header>
 
@@ -131,6 +145,7 @@ export function PaymentMethodSelector({ register, errors }: PaymentMethodSelecto
                 aria-invalid={error ? 'true' : 'false'}
                 {...register('payment')}
               />
+              <OptionIcon src={option.icon} alt="" aria-hidden="true" />
               <span>{option.label}</span>
             </OptionLabel>
           ))}

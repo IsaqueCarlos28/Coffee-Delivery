@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import trashRegularIcon from '../assets/icons/trash-regular.png'
 import { useCart } from '../hooks/useCart'
 import { formatBRL } from '../utils/money'
 import type { DetailedCartItem } from '../types'
@@ -58,6 +59,7 @@ const RemoveButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   min-height: 2.75rem;
   padding: 0.5rem 0.75rem;
   border: 0;
@@ -66,6 +68,12 @@ const RemoveButton = styled.button`
   color: ${({ theme }) => theme.colors.text};
   font-size: 0.75rem;
   text-transform: uppercase;
+`
+
+const RemoveIcon = styled.img`
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
 `
 
 const ItemPrice = styled.p`
@@ -105,6 +113,7 @@ export function CartItem({ item }: CartItemProps) {
               onClick={() => remove(item.coffeeId)}
               aria-label={`Remover ${item.coffee.name}`}
             >
+              <RemoveIcon src={trashRegularIcon} alt="" aria-hidden="true" />
               Remover
             </RemoveButton>
           </Actions>

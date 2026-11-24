@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
+import shoppingCartFillIcon from '../assets/icons/shopping-cart-fill.png'
 import { useCart } from '../hooks/useCart'
 import { formatBRL } from '../utils/money'
 import type { Coffee } from '../types'
@@ -101,6 +102,12 @@ const AddToCartButton = styled.button`
   font-weight: 700;
 `
 
+const CartIcon = styled.img`
+  width: 1.375rem;
+  height: 1.375rem;
+  object-fit: contain;
+`
+
 export function CoffeeCard({ coffee }: CoffeeCardProps) {
   const [quantity, setQuantity] = useState(1)
   const { add } = useCart()
@@ -138,7 +145,7 @@ export function CoffeeCard({ coffee }: CoffeeCardProps) {
             onClick={handleAddToCart}
             aria-label={`Adicionar ${coffee.name} ao carrinho`}
           >
-            Adicionar
+            <CartIcon src={shoppingCartFillIcon} alt="" aria-hidden="true" />
           </AddToCartButton>
         </Actions>
       </Footer>

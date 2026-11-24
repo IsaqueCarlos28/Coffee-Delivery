@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import logoDark from '../assets/logo-dark.svg'
 import logoLight from '../assets/logo-light.svg'
+import mapPinFillIcon from '../assets/icons/map-pin-fill.png'
+import shoppingCartFillIcon from '../assets/icons/shopping-cart-fill.png'
 import { HEADER_LOCATION } from '../constants'
 import { useCart } from '../hooks/useCart'
 import { useTheme } from '../hooks/useTheme'
@@ -77,6 +79,7 @@ const CartLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0.5rem 0.75rem;
@@ -84,6 +87,12 @@ const CartLink = styled(Link)`
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.primaryContrast};
   font-weight: 700;
+`
+
+const ActionIcon = styled.img`
+  width: 1.375rem;
+  height: 1.375rem;
+  flex-shrink: 0;
 `
 
 export function Header() {
@@ -104,12 +113,12 @@ export function Header() {
 
         <Actions>
           <LocationBadge aria-label={`Localização: ${HEADER_LOCATION}`}>
-            <span aria-hidden="true">📍</span>
+            <ActionIcon src={mapPinFillIcon} alt="" aria-hidden="true" />
             <CompactText>{HEADER_LOCATION}</CompactText>
           </LocationBadge>
           <ThemeToggle />
           <CartLink to="/checkout" aria-label={cartLabel}>
-            <span aria-hidden="true">🛒</span>
+            <ActionIcon src={shoppingCartFillIcon} alt="" aria-hidden="true" />
             <CompactText>Carrinho</CompactText>
             <CartBadge />
           </CartLink>

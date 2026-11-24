@@ -1,4 +1,6 @@
 import styled from 'styled-components'
+import minusBoldIcon from '../assets/icons/minus-bold.png'
+import plusBoldIcon from '../assets/icons/plus-bold.png'
 import { MAX_QUANTITY } from '../constants'
 
 interface QuantityInputProps {
@@ -36,6 +38,12 @@ const ControlButton = styled.button`
     opacity: 0.4;
     cursor: not-allowed;
   }
+`
+
+const ControlIcon = styled.img`
+  width: 0.875rem;
+  height: 0.875rem;
+  object-fit: contain;
 `
 
 const ValueInput = styled.input`
@@ -95,7 +103,7 @@ export function QuantityInput({
         aria-label="Diminuir quantidade"
         disabled={value <= min}
       >
-        −
+        <ControlIcon src={minusBoldIcon} alt="" aria-hidden="true" />
       </ControlButton>
       <ValueInput
         inputMode="numeric"
@@ -110,7 +118,7 @@ export function QuantityInput({
         aria-label="Aumentar quantidade"
         disabled={value >= max}
       >
-        +
+        <ControlIcon src={plusBoldIcon} alt="" aria-hidden="true" />
       </ControlButton>
     </Container>
   )
