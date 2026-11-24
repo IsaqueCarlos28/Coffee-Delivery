@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { App } from '../App'
 
 describe('App smoke (RNF-05)', () => {
-  it('renders the application title', () => {
+  it('renders the application shell', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: /coffee delivery/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /coffee delivery - ir para a página inicial/i }),
+    ).toBeInTheDocument()
   })
 })
