@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { HEADER_LOCATION } from '../constants'
+import { useCart } from '../hooks/useCart'
 import { media } from '../styles/breakpoints'
+import { CartBadge } from './CartBadge'
 import { ThemeToggle } from './ThemeToggle'
 
 const HeaderContainer = styled.header`
@@ -53,6 +55,7 @@ const LocationBadge = styled.span`
 `
 
 const CartLink = styled(Link)`
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -66,6 +69,12 @@ const CartLink = styled(Link)`
 `
 
 export function Header() {
+  const { totalUnits } = useCart()
+  const cartLabel =
+    totalUnits > 0
+      ? `Ir para o carrinho, ${totalUnits} ${totalUnits === 1 ? 'item' : 'itens'}`
+      : 'Ir para o carrinho'
+
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -79,8 +88,9 @@ export function Header() {
             {HEADER_LOCATION}
           </LocationBadge>
           <ThemeToggle />
-          <CartLink to="/checkout" aria-label="Ir para o carrinho">
+          <CartLink to="/checkout" aria-label={cartLabel}>
             Carrinho
+            <CartBadge />
           </CartLink>
         </Actions>
       </HeaderContent>

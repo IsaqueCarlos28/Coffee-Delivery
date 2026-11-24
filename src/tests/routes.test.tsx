@@ -3,14 +3,17 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { AppRoutes } from '../AppRoutes'
 import { HEADER_LOCATION } from '../constants'
+import { CartProvider } from '../contexts/CartContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
 
 function renderWithRouter(initialEntry: string) {
   return render(
     <ThemeProvider>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <AppRoutes />
-      </MemoryRouter>
+      <CartProvider>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </CartProvider>
     </ThemeProvider>,
   )
 }
