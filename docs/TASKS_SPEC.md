@@ -8,8 +8,8 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | ID | Status | Objetivo | Requisitos | Arquivos principais | Critério de pronto |
 |----|--------|----------|------------|---------------------|--------------------|
 | T-01 | [x] | Alinhar scaffold Vite + React + TS ao padrão do projeto: dependências, scripts, ESLint/Prettier, Vitest/jsdom, estrutura TECH §2, App mínimo, Playwright (E2E) e Playwright MCP (opencode.jsonc) | RNF-05 | `package.json`, `vite.config.ts`, `tsconfig*.json`, `.prettierrc*`, `src/setupTests.ts`, `playwright.config.ts`, `opencode.jsonc`, pastas `src/*` | `npm run lint`, `test:run` e `build` passam; estrutura base criada; sem boilerplate desnecessário; Playwright e MCP configurados |
-| T-02 | [ ] | Tipos de domínio e catálogo tipado (com imagens exportadas do Figma) | RF-01, RN-08, RNF-03 | `types/*`, `data/coffees.ts`, `assets/coffees/*` | Catálogo compila; ids únicos; imagens otimizadas com dimensões definidas; carregam corretamente |
-| T-03 | [ ] | Utilitários monetários e de preço (centavos, BRL, subtotal, total, taxa fixa) | RF-10, RN-03, RN-04, D-01, D-03 | `constants.ts`, `utils/money.ts`, `utils/pricing.ts` + testes | Funções puras: `pricing` recebe `items` e `catalog` por parâmetro; testes unitários passam, incluindo arredondamento |
+| T-02 | [x] | Tipos de domínio e catálogo tipado (com imagens exportadas do Figma) | RF-01, RN-08, RNF-03 | `types/*`, `data/coffees.ts`, `assets/coffees/*` | Catálogo compila; ids únicos; imagens otimizadas com dimensões definidas; carregam corretamente |
+| T-03 | [x] | Utilitários monetários e de preço (centavos, BRL, subtotal, total, taxa fixa) | RF-10, RN-03, RN-04, D-01, D-03 | `constants.ts`, `utils/money.ts`, `utils/pricing.ts` + testes | Funções puras: `pricing` recebe `items` e `catalog` por parâmetro; testes unitários passam, incluindo arredondamento |
 | T-04 | [ ] | Tokens light/dark, `GlobalStyle`, fontes Baloo 2 e Roboto, breakpoints | RF-14, RNF-01 | `styles/*` | Temas tipados; página base muda de tema |
 | T-05 | [ ] | Branding com IA: gerar logo, variantes light/dark, favicon; registrar prompt e escolha | RF-16 | `assets/logo-*.svg`, `public/favicon.*`, `docs/AI_USAGE.md` | Logo nítida em 32 px nos dois fundos; processo documentado |
 | T-06 | [ ] | `PageLayout`, `Header` (logo, localização decorativa, carrinho) e rotas | RF-07, D-09 | `App.tsx`, `components/Header`, `pages/*` (esqueleto, incluindo NotFound) | Navegar entre `/`, `/checkout`, `/success` e `*` (NotFound) sem reload; refresh direto funciona nas rotas |
@@ -36,3 +36,5 @@ Legenda de status: `[ ]` pendente · `[~]` em andamento · `[x]` concluída
 | Tarefa | Data | Teste realizado | Commit |
 |--------|------|-----------------|--------|
 | T-01 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (1 arquivo, 1 teste); `npm run build` OK; `npm run dev -- --host 127.0.0.1 --port 5174` subiu OK | `chore: alinha scaffold do projeto (T-01)` |
+| T-02 | 2026-11-24 | `npm run lint` OK; `npm run build` OK; tipos e catálogo tipado compilam; placeholders SVG criados para imagens ausentes do Figma | `feat: adiciona tipos de dominio e catalogo (T-02)` |
+| T-03 | 2026-11-24 | `npm run lint` OK; `npm run test:run` OK (3 arquivos, 7 testes); `npm run build` OK; formatBRL/subtotal/total/lista vazia cobertos | `feat: adiciona utils monetarios e pricing (T-03)` |
